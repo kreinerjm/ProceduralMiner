@@ -61,4 +61,12 @@ public class Block
         mapX = x;
         mapY = y;
     }
+
+    public boolean contains(int xx, int yy)
+    {
+        if(xx >= x && xx <= x+16 && yy >= y && yy <= y+16)
+            return true;
+        return false;
+    }
+
 }

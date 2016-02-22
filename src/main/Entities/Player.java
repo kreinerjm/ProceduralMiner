@@ -86,34 +86,7 @@ public class Player
 
     private void updatePosition()
     {
-        if(left && up)
-        {
-            x-=speed;
-            y-=speed;
-        }
-        else if(left && down)
-        {
-            x-=speed;
-            y+=speed;
-        }
-        else if(right && up)
-        {
-            x+=speed;
-            y-=speed;
-        }
-        else if(right && down)
-        {
-            x+=speed;
-            y+=speed;
-        }
-        else if(left)
-            x-=speed;
-        else if(right)
-            x+=speed;
-        else if(up)
-            y-=speed;
-        else if(down)
-            y+=speed;
+
     }
 
     public void tick()

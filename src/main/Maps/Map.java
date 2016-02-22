@@ -1,6 +1,9 @@
 package main.Maps;
 
 import main.Blocks.Block;
+import main.Entities.Player;
+
+import java.util.ArrayList;
 
 /**
  * Created by jacob on 2/19/16.
@@ -9,6 +12,17 @@ public class Map
 {
     public Block[][] blocks;
     public int width, height;
+    private int gravity = 3;
+
+    public int getGravity() {
+        return gravity;
+    }
+
+    public void setGravity(int gravity) {
+        this.gravity = gravity;
+    }
+
+
 
     public Map()
     {
@@ -30,10 +44,33 @@ public class Map
         {
             for(int j = 0; j < height; j++)
             {
-                if(i == 3 || i == 5 || j ==2 || j == 1)
+                if(j >= 0 & j <= 7)
                     blocks[i][j].empty = true;
             }
         }
+    }
+
+    public ArrayList<Block> getContainingBlocks(Player p)
+    {
+        ArrayList<Block> temp = new ArrayList<Block>();
+        for(int i = p.getX(); i < p.getX()+20; i++)
+        {
+            for (int j = p.getY(); j < p.getY()+20; j++)
+            {
+                Block temp2 = getBlockAt(i, j);
+                if (!temp.contains(temp2))
+                    temp.add(temp2);
+            }
+        }
+
+        return temp;
+    }
+
+    public Block getBlockAt(int x, int y)
+    {
+        Block toReturn = blocks[x/(height/2)][y/(height/2)];
+        return toReturn;
+
     }
 
     public boolean hasBlockBelow(Block b)
