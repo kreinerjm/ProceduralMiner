@@ -1,6 +1,7 @@
 package main.Maps;
 
 import main.Blocks.Block;
+import main.Camera;
 import main.Entities.Player;
 
 import java.util.ArrayList;
@@ -46,7 +47,7 @@ public class Map
         {
             for(int j = 0; j < height; j++)
             {
-                if(j <= 16)
+                if(j <= 20)
                     blocks[i][j].empty = true;
             }
         }
@@ -59,19 +60,73 @@ public class Map
         {
             for (int j = p.getY(); j < p.getY()+20; j++)
             {
-                Block temp2 = getBlockAt(i, j);
-                if (!temp.contains(temp2))
-                    temp.add(temp2);
+                    Block temp2 = getBlockAt(i, j);
+                    if (!temp.contains(temp2))
+                        temp.add(temp2);
             }
         }
 
         return temp;
     }
 
+    public ArrayList<Block> getContainingBlocks(Camera c)
+    {
+        ArrayList<Block> temp = new ArrayList<Block>();
+        Block topLeft = getBlockAt(c.getX(),c.getY());
+        int topLeftX = topLeft.getMapX();
+        int topLeftY = topLeft.getMapY();
+        Block bottomRight = getBlockAt(c.getX()+c.getWidth(),c.getY()+c.getHeight());
+        int bottomRightX = bottomRight.getMapX();
+        int bottomRightY = bottomRight.getMapY();
+
+        System.out.println("x1 :"+topLeftX+" x2 :"+bottomRightX+" y1 :"+topLeftY+" y2:"+bottomRightY);
+
+        if(topLeftX < bottomRightX)
+        {
+            //System.out.println("2nd is bigger");
+            for(int i = topLeftX; i < bottomRightX; i++)
+            {
+                for(int j = topLeftY; j < bottomRightY; j++)
+                {
+                    temp.add(blocks[i][j]);
+                }
+            }
+        }
+        else if(topLeftX > bottomRightX)
+        {
+            //System.out.println("1st is bigger");
+            for(int i = topLeftX; i < width; i++)
+            {
+                for(int j = topLeftY; j < bottomRightY; j++)
+                {
+                    //System.out.println("Adding "+i+" "+j);
+                    temp.add(blocks[i][j]);
+                }
+            }
+            for(int i = 0; i < bottomRightX; i++)
+            {
+                for(int j = topLeftY; j < bottomRightY; j++)
+                {
+                    //System.out.println("Adding "+i+" "+j);
+                    temp.add(blocks[i][j]);
+                }
+            }
+        }
+
+
+
+
+        return temp;
+    }
+
     public Block getBlockAt(int x, int y)
     {
-        Block toReturn = blocks[x/(scale)][y/(scale)];
-        return toReturn;
+        if(x < 0)
+            return blocks[(((width*scale)+x)/scale)][(y/scale)];
+        else if(x > width*scale - 1)
+            return blocks[((x%(width*scale))/scale)][(y/scale)];
+        else
+            return blocks[x/scale][y/scale];
 
     }
 
@@ -103,10 +158,15 @@ public class Map
     {
         if(b.mapX < width-1)
         {
-            if(!blocks[b.mapX+1][b.mapY].empty)
+            if(!blocks[b.getMapX()+1][b.getMapY()].empty)
             {
                 return true;
             }
+        }
+        else
+        {
+            if(!blocks[0][b.getMapY()].empty)
+                return true;
         }
         return false;
     }
@@ -119,6 +179,11 @@ public class Map
             {
                 return true;
             }
+        }
+        else
+        {
+            if(!blocks[width-1][b.mapY].empty)
+                return true;
         }
         return false;
     }

@@ -19,10 +19,11 @@ import java.util.ArrayList;
 public class MinerPanel extends JPanel implements MouseListener, KeyListener
 {
 
-    Player player = new Player(20,20);
+    Player player = new Player(256,256);
     BufferedImage buffer;
     Map map;
     Camera camera = new Camera(0,0);
+    boolean left;
 
     public MinerPanel()
     {
@@ -41,56 +42,168 @@ public class MinerPanel extends JPanel implements MouseListener, KeyListener
         Graphics b2d = buffer.createGraphics();
         b2d.setColor(Color.WHITE);
         b2d.fillRect(0, 0, buffer.getWidth(), buffer.getHeight());
-
-        for(int i = 0; i < map.blocks.length; i++)
+        
+        ArrayList<Block> cameraContains = map.getContainingBlocks(camera);
+        if(left && camera.getX() > map.width*map.scale-camera.getWidth())
         {
-           // System.out.print(i+",");
-            for(int j = 0; j < map.blocks[i].length; j++)
-            {
-               // System.out.println(j);
-                if(!map.blocks[i][j].empty)
-                {
-                    b2d.setColor(Color.BLACK);
-                   // System.out.println("Not empty : "+i+","+j);
-                    if (!map.hasBlockAbove(map.blocks[i][j]))
-                    {
-                    //    System.out.println("Drawing line above "+i+","+j);
-                        b2d.drawLine(-camera.getX() + i * map.scale,-camera.getY()+ j * map.scale,-camera.getX() + (i + 1) * map.scale, -camera.getY() + j * map.scale);
+            //System.out.println("left of seam");
+            for(Block b : cameraContains) {
+                b2d.setColor(Color.CYAN);
+                if (b.getMapX() < map.width / 2) { // on right side of seam
+                    //b2d.fillRect(-camera.getX() + (b.getX() + map.width * map.scale), -camera.getY() + b.getY(), map.scale, map.scale);
+
+                    if (!b.empty) {
+                        b2d.setColor(Color.BLACK);
+                        // System.out.println("Not empty : "+i+","+j);
+                        if (!map.hasBlockAbove(b)) {
+                            //    System.out.println("Drawing line above "+i+","+j);
+                            b2d.drawLine(-camera.getX() + (b.getMapX() + map.width) * map.scale, -camera.getY() + b.getMapY() * map.scale, -camera.getX() + (b.getMapX() + 1 + map.width) * map.scale, -camera.getY() + b.getMapY() * map.scale);
+                        }
+                        if (!map.hasBlockBelow(b)) {
+                            //     System.out.prb.getMapX()ntln("Drawing line below "+i+","+j);
+                            b2d.drawLine(-camera.getX() + (b.getMapX() + map.width) * map.scale, -camera.getY() + (b.getMapY() + 1) * map.scale, -camera.getX() + (b.getMapX() + 1 + map.width) * map.scale, -camera.getY() + (b.getMapY() + 1) * map.scale);
+                        }
+                        if (!map.hasBlockLeft(b)) {
+                            //    System.out.println("Drawing line to the left of "+i+","+j);
+                            b2d.drawLine(-camera.getX() + (b.getMapX() + map.width) * map.scale, -camera.getY() + b.getMapY() * map.scale, -camera.getX() + (b.getMapX() + map.width) * map.scale, -camera.getY() + (b.getMapY() + 1) * map.scale);
+                        }
+                        if (!map.hasBlockRight(b)) {
+                            //    System.out.println("Drawing line to the right of "+i+","+j);
+                            b2d.drawLine(-camera.getX() + (b.getMapX() + 1 + map.width) * map.scale, -camera.getY() + b.getMapY() * map.scale, -camera.getX() + (b.getMapX() + 1 + map.width) * map.scale, -camera.getY() + (b.getMapY() + 1) * map.scale);
+                        }
+//
                     }
-                    if (!map.hasBlockBelow(map.blocks[i][j]))
-                    {
-                   //     System.out.println("Drawing line below "+i+","+j);
-                        b2d.drawLine(-camera.getX()+ i * map.scale,-camera.getY() + (j + 1) * map.scale,-camera.getX() + (i + 1) * map.scale,-camera.getY() + (j + 1) * map.scale);
+
+                } //working
+                else {
+                    //b2d.fillRect(-camera.getX() + b.getX(), -camera.getY() + b.getY(), map.scale, map.scale);
+
+                    if (!b.empty) {
+                        b2d.setColor(Color.BLACK);
+                        // System.out.println("Not empty : "+i+","+j);
+                        if (!map.hasBlockAbove(b)) {
+                            //    System.out.println("Drawing line above "+i+","+j);
+                            b2d.drawLine(-camera.getX() + b.getMapX() * map.scale, -camera.getY() + b.getMapY() * map.scale, -camera.getX() + (b.getMapX() + 1) * map.scale, -camera.getY() + b.getMapY() * map.scale);
+                        }
+                        if (!map.hasBlockBelow(b)) {
+                            //     System.out.prb.getMapX()ntln("Drawing line below "+i+","+j);
+                            b2d.drawLine(-camera.getX() + b.getMapX() * map.scale, -camera.getY() + (b.getMapY() + 1) * map.scale, -camera.getX() + (b.getMapX() + 1) * map.scale, -camera.getY() + (b.getMapY() + 1) * map.scale);
+                        }
+                        if (!map.hasBlockLeft(b)) {
+                            //    System.out.println("Drawing line to the left of "+i+","+j);
+                            b2d.drawLine(-camera.getX() + b.getMapX() * map.scale, -camera.getY() + b.getMapY() * map.scale, -camera.getX() + b.getMapX() * map.scale, -camera.getY() + (b.getMapY() + 1) * map.scale);
+                        }
+                        if (!map.hasBlockRight(b)) {
+                            //    System.out.println("Drawing line to the right of "+i+","+j);
+                            b2d.drawLine(-camera.getX() + (b.getMapX() + 1) * map.scale, -camera.getY() + b.getMapY() * map.scale, -camera.getX() + (b.getMapX() + 1) * map.scale, -camera.getY() + (b.getMapY() + 1) * map.scale);
+                        }
                     }
-                    if (!map.hasBlockLeft(map.blocks[i][j]))
-                    {
-                    //    System.out.println("Drawing line to the left of "+i+","+j);
-                        b2d.drawLine(-camera.getX() + i * map.scale,-camera.getY() + j * map.scale,-camera.getX() + i * map.scale, -camera.getY() +(j + 1) * map.scale);
-                    }
-                    if (!map.hasBlockRight(map.blocks[i][j]))
-                    {
-                    //    System.out.println("Drawing line to the right of "+i+","+j);
-                        b2d.drawLine(-camera.getX() + (i + 1) * map.scale,-camera.getY() + j * map.scale,-camera.getX() + (i + 1) * map.scale,-camera.getY() + (j + 1) * map.scale);
-                    }
-                    ArrayList<Block> contained = map.getContainingBlocks(player);
-                    b2d.setColor(Color.RED);
-                    for(Block b : contained)
-                    {
-                       // b2d.fillRect(b.getX(),b.getY(),map.height/2,map.height/2);
-                    }
-                }
-                else
-                {
-                   // System.out.println(i+","+j+" is empty");
                 }
             }
-            b2d.setColor(Color.blue);
-            b2d.drawOval(player.getX()- camera.getX(),player.getY()-camera.getY(),20,20);
-            Block temp = map.getBlockAt(player.getX(),player.getY());
-          //  b2d.drawString("Player current square = "+temp.getMapX()+","+temp.getMapY(),500,20);
-           // b2d.drawString("Player current x,y = "+player.getX()+","+player.getY(),500,40);
-           // b2d.drawString("Camera current x,y = "+camera.getX()+","+camera.getY(),500,60);
+
         }
+        else if(!left && camera.getX() < 0)
+        {
+            //System.out.println("right of seam");
+            for(Block b : cameraContains) {
+                b2d.setColor(Color.CYAN);
+                if (b.getMapX() > map.width / 2) {
+                    //b2d.fillRect(-camera.getX() + (b.getX() - map.width * map.scale), -camera.getY() + b.getY(), map.scale, map.scale);
+
+                    if (!b.empty) {
+                        b2d.setColor(Color.BLACK);
+                        // System.out.println("Not empty : "+i+","+j);
+                        if (!map.hasBlockAbove(b)) {
+                            //    System.out.println("Drawing line above "+i+","+j);
+                            b2d.drawLine(-camera.getX() + (b.getMapX() - map.width) * map.scale, -camera.getY() + b.getMapY() * map.scale, -camera.getX() + (b.getMapX() + 1 - map.width) * map.scale, -camera.getY() + b.getMapY() * map.scale);
+                        }
+                        if (!map.hasBlockBelow(b)) {
+                            //     System.out.prb.getMapX()ntln("Drawing line below "+i+","+j);
+                            b2d.drawLine(-camera.getX() + (b.getMapX() - map.width) * map.scale, -camera.getY() + (b.getMapY() + 1) * map.scale, -camera.getX() + (b.getMapX() + 1 - map.width) * map.scale, -camera.getY() + (b.getMapY() + 1) * map.scale);
+                        }
+                        if (!map.hasBlockLeft(b)) {
+                            //    System.out.println("Drawing line to the left of "+i+","+j);
+                            b2d.drawLine(-camera.getX() + (b.getMapX() - map.width) * map.scale, -camera.getY() + b.getMapY() * map.scale, -camera.getX() + (b.getMapX() - map.width) * map.scale, -camera.getY() + (b.getMapY() + 1) * map.scale);
+                        }
+                        if (!map.hasBlockRight(b)) {
+                            //    System.out.println("Drawing line to the right of "+i+","+j);
+                            b2d.drawLine(-camera.getX() + (b.getMapX() + 1 - map.width) * map.scale, -camera.getY() + b.getMapY() * map.scale, -camera.getX() + (b.getMapX() + 1 - map.width) * map.scale, -camera.getY() + (b.getMapY() + 1) * map.scale);
+                        }
+//
+                    }
+
+                } else {
+                   // b2d.fillRect(-camera.getX() + b.getX(), -camera.getY() + b.getY(), map.scale, map.scale);
+
+                    if (!b.empty) {
+                        b2d.setColor(Color.BLACK);
+                        // System.out.println("Not empty : "+i+","+j);
+                        if (!map.hasBlockAbove(b)) {
+                            //    System.out.println("Drawing line above "+i+","+j);
+                            b2d.drawLine(-camera.getX() + b.getMapX() * map.scale, -camera.getY() + b.getMapY() * map.scale, -camera.getX() + (b.getMapX() + 1) * map.scale, -camera.getY() + b.getMapY() * map.scale);
+                        }
+                        if (!map.hasBlockBelow(b)) {
+                            //     System.out.prb.getMapX()ntln("Drawing line below "+i+","+j);
+                            b2d.drawLine(-camera.getX() + b.getMapX() * map.scale, -camera.getY() + (b.getMapY() + 1) * map.scale, -camera.getX() + (b.getMapX() + 1) * map.scale, -camera.getY() + (b.getMapY() + 1) * map.scale);
+                        }
+                        if (!map.hasBlockLeft(b)) {
+                            //    System.out.println("Drawing line to the left of "+i+","+j);
+                            b2d.drawLine(-camera.getX() + b.getMapX() * map.scale, -camera.getY() + b.getMapY() * map.scale, -camera.getX() + b.getMapX() * map.scale, -camera.getY() + (b.getMapY() + 1) * map.scale);
+                        }
+                        if (!map.hasBlockRight(b)) {
+                            //    System.out.println("Drawing line to the right of "+i+","+j);
+                            b2d.drawLine(-camera.getX() + (b.getMapX() + 1) * map.scale, -camera.getY() + b.getMapY() * map.scale, -camera.getX() + (b.getMapX() + 1) * map.scale, -camera.getY() + (b.getMapY() + 1) * map.scale);
+                        }
+//
+                    }
+                }
+            }
+
+        }
+        else
+        {
+
+            for(Block b : cameraContains) {
+                b2d.setColor(Color.CYAN);
+                System.out.println("seam not in view");
+                //b2d.fillOval(-camera.getX() + b.getX(),-camera.getY() + b.getY(),10,10);
+               // b2d.fillRect(-camera.getX() + b.getX(), -camera.getY() + b.getY(), map.scale, map.scale);
+                System.out.println(cameraContains.size());
+                //b2d.fillRect(-camera.getX() + b.getX(), -camera.getY() + b.getY(), map.scale, map.scale);
+
+                if (!b.empty) {
+                    b2d.setColor(Color.BLACK);
+                    // System.out.println("Not empty : "+i+","+j);
+                    if (!map.hasBlockAbove(b)) {
+                        //    System.out.println("Drawing line above "+i+","+j);
+                        b2d.drawLine(-camera.getX() + b.getMapX() * map.scale, -camera.getY() + b.getMapY() * map.scale, -camera.getX() + (b.getMapX() + 1) * map.scale, -camera.getY() + b.getMapY() * map.scale);
+                    }
+                    if (!map.hasBlockBelow(b)) {
+                        //     System.out.prb.getMapX()ntln("Drawing line below "+i+","+j);
+                        b2d.drawLine(-camera.getX() + b.getMapX() * map.scale, -camera.getY() + (b.getMapY() + 1) * map.scale, -camera.getX() + (b.getMapX() + 1) * map.scale, -camera.getY() + (b.getMapY() + 1) * map.scale);
+                    }
+                    if (!map.hasBlockLeft(b)) {
+                        //    System.out.println("Drawing line to the left of "+i+","+j);
+                        b2d.drawLine(-camera.getX() + b.getMapX() * map.scale, -camera.getY() + b.getMapY() * map.scale, -camera.getX() + b.getMapX() * map.scale, -camera.getY() + (b.getMapY() + 1) * map.scale);
+                    }
+                    if (!map.hasBlockRight(b)) {
+                        //    System.out.println("Drawing line to the right of "+i+","+j);
+                        b2d.drawLine(-camera.getX() + (b.getMapX() + 1) * map.scale, -camera.getY() + b.getMapY() * map.scale, -camera.getX() + (b.getMapX() + 1) * map.scale, -camera.getY() + (b.getMapY() + 1) * map.scale);
+                    }
+
+                }
+
+            }
+        }
+
+
+
+        b2d.setColor(Color.blue);
+        b2d.drawOval(player.getX()- camera.getX(),player.getY()-camera.getY(),20,20);
+        Block temp = map.getBlockAt(player.getX(),player.getY());
+        b2d.drawString("Player current square = "+temp.getMapX()+","+temp.getMapY(),500,20);
+        b2d.drawString("Player current x,y = "+player.getX()+","+player.getY(),500,40);
+        b2d.drawString("Camera current x,y = "+camera.getX()+","+camera.getY(),500,60);
         g2d.drawImage(buffer,0,0,buffer.getWidth(),buffer.getHeight(), null);
 
     }
@@ -99,6 +212,12 @@ public class MinerPanel extends JPanel implements MouseListener, KeyListener
 
     public void tick()
     {
+       // System.out.println(left);
+        if(player.getX() > (map.width*map.scale)/2 && player.getX() < (map.width*map.scale))
+            left = true;
+        else if(player.getX() > 0 && player.getX() < (map.width*map.scale)/2)
+            left = false;
+
         player.tick();
         camera.setX(player.getX()-512);
         camera.setY(player.getY()-256);
@@ -194,10 +313,17 @@ public class MinerPanel extends JPanel implements MouseListener, KeyListener
                     player.setY(player.getY() - player.getSpeed());
                 else
                     player.setY(highest.get(0).getY());
-            }
-            else
+            } else
                 player.setY(player.getY()-player.getSpeed());
 
+        }
+        if(player.getX() < 0)
+        {
+            player.setX(map.width*map.scale+player.getX());
+        }
+        if(player.getX() > map.width*map.scale)
+        {
+            player.setX(player.getX()-map.width*map.scale);
         }
     }
 
