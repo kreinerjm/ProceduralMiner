@@ -13,6 +13,7 @@ public class Map
     public Block[][] blocks;
     public int width, height;
     private int gravity = 3;
+    public int scale = 16;
 
     public int getGravity() {
         return gravity;
@@ -26,15 +27,16 @@ public class Map
 
     public Map()
     {
-        width = 64;
-        height = 32;
+        width = 128;
+        height = 64;
+
 
         blocks = new Block[width][height];
         for(int i = 0 ; i < width; i++)
         {
             for(int j = 0; j < height; j++)
             {
-                blocks[i][j] = new Block(i*(height/2),j*(height/2));
+                blocks[i][j] = new Block(i*(scale),j*(scale));
                 blocks[i][j].setMapCoords(i,j);
             }
         }
@@ -44,7 +46,7 @@ public class Map
         {
             for(int j = 0; j < height; j++)
             {
-                if(j >= 0 & j <= 7)
+                if(j <= 16)
                     blocks[i][j].empty = true;
             }
         }
@@ -68,7 +70,7 @@ public class Map
 
     public Block getBlockAt(int x, int y)
     {
-        Block toReturn = blocks[x/(height/2)][y/(height/2)];
+        Block toReturn = blocks[x/(scale)][y/(scale)];
         return toReturn;
 
     }

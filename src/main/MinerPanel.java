@@ -22,6 +22,7 @@ public class MinerPanel extends JPanel implements MouseListener, KeyListener
     Player player = new Player(20,20);
     BufferedImage buffer;
     Map map;
+    Camera camera = new Camera(0,0);
 
     public MinerPanel()
     {
@@ -50,33 +51,32 @@ public class MinerPanel extends JPanel implements MouseListener, KeyListener
                 if(!map.blocks[i][j].empty)
                 {
                     b2d.setColor(Color.BLACK);
-                    int scale = map.height/2;
                    // System.out.println("Not empty : "+i+","+j);
                     if (!map.hasBlockAbove(map.blocks[i][j]))
                     {
                     //    System.out.println("Drawing line above "+i+","+j);
-                        b2d.drawLine(i * scale, j * scale, (i + 1) * scale, j * scale);
+                        b2d.drawLine(-camera.getX() + i * map.scale,-camera.getY()+ j * map.scale,-camera.getX() + (i + 1) * map.scale, -camera.getY() + j * map.scale);
                     }
                     if (!map.hasBlockBelow(map.blocks[i][j]))
                     {
                    //     System.out.println("Drawing line below "+i+","+j);
-                        b2d.drawLine(i * scale, (j + 1) * scale, (i + 1) * scale, (j + 1) * scale);
+                        b2d.drawLine(-camera.getX()+ i * map.scale,-camera.getY() + (j + 1) * map.scale,-camera.getX() + (i + 1) * map.scale,-camera.getY() + (j + 1) * map.scale);
                     }
                     if (!map.hasBlockLeft(map.blocks[i][j]))
                     {
                     //    System.out.println("Drawing line to the left of "+i+","+j);
-                        b2d.drawLine(i * scale, j * scale, i * scale, (j + 1) * scale);
+                        b2d.drawLine(-camera.getX() + i * map.scale,-camera.getY() + j * map.scale,-camera.getX() + i * map.scale, -camera.getY() +(j + 1) * map.scale);
                     }
                     if (!map.hasBlockRight(map.blocks[i][j]))
                     {
                     //    System.out.println("Drawing line to the right of "+i+","+j);
-                        b2d.drawLine((i + 1) * scale, j * scale, (i + 1) * scale, (j + 1) * scale);
+                        b2d.drawLine(-camera.getX() + (i + 1) * map.scale,-camera.getY() + j * map.scale,-camera.getX() + (i + 1) * map.scale,-camera.getY() + (j + 1) * map.scale);
                     }
                     ArrayList<Block> contained = map.getContainingBlocks(player);
                     b2d.setColor(Color.RED);
                     for(Block b : contained)
                     {
-                        b2d.fillRect(b.getX(),b.getY(),map.height/2,map.height/2);
+                       // b2d.fillRect(b.getX(),b.getY(),map.height/2,map.height/2);
                     }
                 }
                 else
@@ -85,24 +85,24 @@ public class MinerPanel extends JPanel implements MouseListener, KeyListener
                 }
             }
             b2d.setColor(Color.blue);
-            b2d.drawOval(player.getX(),player.getY(),20,20);
+            b2d.drawOval(player.getX()- camera.getX(),player.getY()-camera.getY(),20,20);
             Block temp = map.getBlockAt(player.getX(),player.getY());
-            b2d.drawString("Player current square = "+temp.getMapX()+","+temp.getMapY(),500,20);
-            b2d.drawString("Player current x,y = "+player.getX()+","+player.getY(),500,40);
+          //  b2d.drawString("Player current square = "+temp.getMapX()+","+temp.getMapY(),500,20);
+           // b2d.drawString("Player current x,y = "+player.getX()+","+player.getY(),500,40);
+           // b2d.drawString("Camera current x,y = "+camera.getX()+","+camera.getY(),500,60);
         }
         g2d.drawImage(buffer,0,0,buffer.getWidth(),buffer.getHeight(), null);
 
     }
 
+
+
     public void tick()
     {
         player.tick();
-
-        //if(player.getY()+map.getGravity() < 6)
-
+        camera.setX(player.getX()-512);
+        camera.setY(player.getY()-256);
         playerCollisionDetection();
-
-
 
         repaint();
     }
@@ -121,10 +121,10 @@ public class MinerPanel extends JPanel implements MouseListener, KeyListener
         }
         if(below && !player.isUp())
         {
-            if(player.getY()+map.getGravity()+20 < lowest.get(0).getY()+map.height/2)
+            if(player.getY()+map.getGravity()+20 < lowest.get(0).getY()+map.scale)
                 player.setY(player.getY()+map.getGravity());
             else
-                player.setY(lowest.get(0).getY()-20+map.height/2);
+                player.setY(lowest.get(0).getY()-20+map.scale);
         }
         else
         {
@@ -144,7 +144,7 @@ public class MinerPanel extends JPanel implements MouseListener, KeyListener
             }
             if(left)
             {
-                if(player.getX()-player.getSpeed() > leftMost.get(0).getX()+map.height/2)
+                if(player.getX()-player.getSpeed() > leftMost.get(0).getX()+map.scale)
                     player.setX(player.getX() - player.getSpeed());
                 else
                     player.setX(leftMost.get(0).getX()+1);
@@ -167,10 +167,10 @@ public class MinerPanel extends JPanel implements MouseListener, KeyListener
             }
             if(right)
             {
-                if(player.getX()+player.getSpeed()+20 < rightMost.get(0).getX()+map.height/2)
+                if(player.getX()+player.getSpeed()+20 < rightMost.get(0).getX()+map.scale)
                     player.setX(player.getX() + player.getSpeed());
                 else
-                    player.setX(rightMost.get(0).getX() - 20 + map.height/2);
+                    player.setX(rightMost.get(0).getX() - 20 + map.scale);
             }
             else
                 player.setX(player.getX()+player.getSpeed());
@@ -299,13 +299,14 @@ public class MinerPanel extends JPanel implements MouseListener, KeyListener
     @Override
     public void mouseReleased(MouseEvent e)
     {
-        Block selected = map.blocks[e.getX()/(map.height/2)][e.getY()/(map.height/2)];
-        int distance1 = Math.abs(selected.getX()+(map.height/4)-player.getX()+10);
-        int distance2 = Math.abs(selected.getY()+(map.height/4)-player.getY()+10);
+        Block selected = map.blocks[(e.getX() + camera.getX())/(map.scale)][(e.getY() + camera.getY())/(map.scale)];
+        int distance1 = Math.abs(selected.getX()+(map.scale/2)-player.getX()+10);
+        int distance2 = Math.abs(selected.getY()+(map.scale/2)-player.getY()+10);
         int distance = (int)(Math.sqrt(distance1*distance1 + distance2*distance2)+.5);
         if(distance<=player.getMineDistance())
             selected.empty = true;
         System.out.println(distance);
+        System.out.println(selected.getMapX()+","+selected.getMapY());
 
     }
 
@@ -336,6 +337,22 @@ public class MinerPanel extends JPanel implements MouseListener, KeyListener
             player.setUp(true);
         if(e.getKeyCode() == KeyEvent.VK_S)
             player.setDown(true);
+        if(e.getKeyCode() == KeyEvent.VK_LEFT)
+        {
+            //System.out.println("hello?");
+            camera.setX(camera.getX()-1);
+            //System.out.println(camera.getX());
+        }
+
+        if(e.getKeyCode() == KeyEvent.VK_RIGHT)
+            camera.setX(camera.getX()+1);
+
+        if(e.getKeyCode() == KeyEvent.VK_UP)
+        {
+            camera.setY(camera.getY()-1);
+        }
+        if(e.getKeyCode() == KeyEvent.VK_DOWN)
+            camera.setY(camera.getY()+1);
     }
 
     @Override
