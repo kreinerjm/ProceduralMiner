@@ -20,7 +20,7 @@ import java.util.ArrayList;
 public class MinerPanel extends JPanel implements MouseListener, KeyListener
 {
 
-    Player player = new Player(256,256);
+    Player player;
     BufferedImage buffer;
     Map map;
     Camera camera = new Camera(0,0);
@@ -30,6 +30,7 @@ public class MinerPanel extends JPanel implements MouseListener, KeyListener
     {
         setPreferredSize(new Dimension(1024+16, 512+32));
         map = new Map();
+        player = new Player(256,2000);
         this.setFocusable(true);
         addKeyListener(this);
         addMouseListener(this);
@@ -341,12 +342,12 @@ public class MinerPanel extends JPanel implements MouseListener, KeyListener
             }
             if(above)
             {
-                if(player.getY()-player.getSpeed() > highest.get(0).getY())
-                    player.setY(player.getY() - player.getSpeed());
+                if(player.getY()-player.getSpeed()*3 > highest.get(0).getY())
+                    player.setY(player.getY() - player.getSpeed()*3);
                 else
                     player.setY(highest.get(0).getY());
             } else
-                player.setY(player.getY()-player.getSpeed());
+                player.setY(player.getY()-player.getSpeed()*3);
 
         }
         if(player.getX() < 0)

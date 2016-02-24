@@ -15,9 +15,9 @@ public class Map
 {
     public Block[][] blocks;
     public int width, height;
-    private int gravity = 3;
+    private int gravity = 15;
     public int scale = 16;
-    int groundLevel = 50;
+    int groundLevel = 200;
 
     public int getGravity() {
         return gravity;
@@ -29,7 +29,7 @@ public class Map
 
     public Map()
     {
-        width = 1024;
+        width = 512;
         height = 512;
 
 
@@ -58,32 +58,35 @@ public class Map
 
     public void generateMountains()
     {
-        int numMountains = (int)(1 + Math.random()*(width/128));
+        System.out.println("Starting");
+        int numMountains = (int)(3 + Math.random()*(width/64));
         for(int j = 0; j < numMountains; j++)
         {
             int randomX = (int) (Math.random() * width);
-            System.out.println("random x :"+randomX);
+           // System.out.println("random x :"+randomX);
             Block parent = new Dirt(randomX*scale, groundLevel*scale);
             parent.setMapCoords(randomX,groundLevel);
-            System.out.println(parent.getMapY()+parent.getMapX());
+           // System.out.println(parent.getMapY()+parent.getMapX());
             blocks[randomX][groundLevel] = parent;
             int maxHeight = 3 * groundLevel / 4;
             ArrayList<Block> mountain = new ArrayList<Block>();
             mountain.add(parent);
-            System.out.println("Mountain size : "+mountain.size());
-            int randomSize = (int) (Math.random() * maxHeight * scale);
-            int currentRow = parent.getMapY();
+          //  System.out.println("Mountain size : "+mountain.size());
+            int randomSize = (int) (Math.random() * (maxHeight * scale * 4));
             //System.out.println("parent mapy : "+currentRow);
             for (int i = 0; i < randomSize; i++)
             {
                 ArrayList<Block> surrounding = getSurrounding(mountain);
-                System.out.println("surrounding :"+surrounding.size());
+                if(surrounding.size() == 0)
+                    break;
+             //   System.out.println("surrounding :"+surrounding.size());
                 int temp = (int) (Math.random()*surrounding.size());
                 surrounding.get(temp).setEmpty(false);
                 mountain.add(surrounding.get(temp));
 
             }
         }
+        System.out.println("Ending");
     }
 
     public ArrayList<Block> getSurrounding(ArrayList<Block> A)
@@ -93,17 +96,17 @@ public class Map
         {
             if(!hasBlockLeft(b)&&!toReturn.contains(blocks[b.mapX-1][b.mapY]))
             {
-                System.out.println("1");
+                //System.out.println("1");
                 toReturn.add(blocks[b.mapX-1][b.mapY]);
             }
             if(!hasBlockAbove(b)&&!toReturn.contains(blocks[b.mapX][b.mapY-1]))
             {
-                System.out.println("2");
+                //System.out.println("2");
                 toReturn.add(blocks[b.mapX][b.mapY-1]);
             }
             if (!hasBlockRight(b)&&!toReturn.contains(blocks[b.mapX+1][b.mapY]))
             {
-                System.out.println("3");
+                //System.out.println("3");
                 toReturn.add(blocks[b.mapX+1][b.mapY]);
             }
         }
