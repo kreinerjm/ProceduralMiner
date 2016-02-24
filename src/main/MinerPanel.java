@@ -40,9 +40,17 @@ public class MinerPanel extends JPanel implements MouseListener, KeyListener
     public void paint(Graphics g)
     {
         Graphics2D g2d = (Graphics2D) g;
+
+        g2d.setRenderingHint(
+                RenderingHints.KEY_ANTIALIASING,
+                RenderingHints.VALUE_ANTIALIAS_ON);
+
         Graphics b2d = buffer.createGraphics();
         b2d.setColor(new Color(0x2D287B));
         b2d.fillRect(0, 0, buffer.getWidth(), buffer.getHeight());
+
+
+
 
         ArrayList<Block> cameraContains = map.getContainingBlocks(camera);
         if(left && camera.getX() > map.width*map.scale-camera.getWidth())
