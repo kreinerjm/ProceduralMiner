@@ -79,7 +79,6 @@ public class Map
         int bottomRightX = bottomRight.getMapX();
         int bottomRightY = bottomRight.getMapY();
 
-        System.out.println("x1 :"+topLeftX+" x2 :"+bottomRightX+" y1 :"+topLeftY+" y2:"+bottomRightY);
 
         if(topLeftX < bottomRightX)
         {

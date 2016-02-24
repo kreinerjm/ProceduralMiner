@@ -42,7 +42,7 @@ public class MinerPanel extends JPanel implements MouseListener, KeyListener
         Graphics b2d = buffer.createGraphics();
         b2d.setColor(Color.WHITE);
         b2d.fillRect(0, 0, buffer.getWidth(), buffer.getHeight());
-        
+
         ArrayList<Block> cameraContains = map.getContainingBlocks(camera);
         if(left && camera.getX() > map.width*map.scale-camera.getWidth())
         {
@@ -165,10 +165,10 @@ public class MinerPanel extends JPanel implements MouseListener, KeyListener
 
             for(Block b : cameraContains) {
                 b2d.setColor(Color.CYAN);
-                System.out.println("seam not in view");
+               // System.out.println("seam not in view");
                 //b2d.fillOval(-camera.getX() + b.getX(),-camera.getY() + b.getY(),10,10);
                // b2d.fillRect(-camera.getX() + b.getX(), -camera.getY() + b.getY(), map.scale, map.scale);
-                System.out.println(cameraContains.size());
+                //System.out.println(cameraContains.size());
                 //b2d.fillRect(-camera.getX() + b.getX(), -camera.getY() + b.getY(), map.scale, map.scale);
 
                 if (!b.empty) {
