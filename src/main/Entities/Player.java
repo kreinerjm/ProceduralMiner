@@ -6,7 +6,7 @@ package main.Entities;
 public class Player
 {
     int x, y;
-    int speed = 5;
+    int speed = 20;
 
 
 

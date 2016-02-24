@@ -17,6 +17,7 @@ public class Map
     public int width, height;
     private int gravity = 3;
     public int scale = 16;
+    int groundLevel = 50;
 
     public int getGravity() {
         return gravity;
@@ -28,8 +29,8 @@ public class Map
 
     public Map()
     {
-        width = 128;
-        height = 64;
+        width = 1024;
+        height = 512;
 
 
         blocks = new Block[width][height];
@@ -47,16 +48,81 @@ public class Map
         {
             for(int j = 0; j < height; j++)
             {
-                if(j <= 20)
+                if(j <= groundLevel)
                     blocks[i][j].empty = true;
             }
         }
+
+        generateMountains();
     }
 
     public void generateMountains()
     {
+        int numMountains = (int)(1 + Math.random()*(width/128));
+        for(int j = 0; j < numMountains; j++)
+        {
+            int randomX = (int) (Math.random() * width);
+            System.out.println("random x :"+randomX);
+            Block parent = new Dirt(randomX*scale, groundLevel*scale);
+            parent.setMapCoords(randomX,groundLevel);
+            System.out.println(parent.getMapY()+parent.getMapX());
+            blocks[randomX][groundLevel] = parent;
+            int maxHeight = 3 * groundLevel / 4;
+            ArrayList<Block> mountain = new ArrayList<Block>();
+            mountain.add(parent);
+            System.out.println("Mountain size : "+mountain.size());
+            int randomSize = (int) (Math.random() * maxHeight * scale);
+            int currentRow = parent.getMapY();
+            //System.out.println("parent mapy : "+currentRow);
+            for (int i = 0; i < randomSize; i++)
+            {
+                ArrayList<Block> surrounding = getSurrounding(mountain);
+                System.out.println("surrounding :"+surrounding.size());
+                int temp = (int) (Math.random()*surrounding.size());
+                surrounding.get(temp).setEmpty(false);
+                mountain.add(surrounding.get(temp));
 
+            }
+        }
     }
+
+    public ArrayList<Block> getSurrounding(ArrayList<Block> A)
+    {
+        ArrayList<Block> toReturn = new ArrayList<Block>();
+        for(Block b : A)
+        {
+            if(!hasBlockLeft(b)&&!toReturn.contains(blocks[b.mapX-1][b.mapY]))
+            {
+                System.out.println("1");
+                toReturn.add(blocks[b.mapX-1][b.mapY]);
+            }
+            if(!hasBlockAbove(b)&&!toReturn.contains(blocks[b.mapX][b.mapY-1]))
+            {
+                System.out.println("2");
+                toReturn.add(blocks[b.mapX][b.mapY-1]);
+            }
+            if (!hasBlockRight(b)&&!toReturn.contains(blocks[b.mapX+1][b.mapY]))
+            {
+                System.out.println("3");
+                toReturn.add(blocks[b.mapX+1][b.mapY]);
+            }
+        }
+        return toReturn;
+    }
+
+
+    public ArrayList<Block> getOpenBordering(Block b)
+    {
+        ArrayList<Block> toReturn = new ArrayList<Block>();
+        if(hasBlockLeft(b))
+            toReturn.add(getBlockAt(b.getMapX()-1,b.getMapY()));
+        if(hasBlockRight(b))
+            toReturn.add(getBlockAt(b.getMapX()+1,b.getMapY()));
+        if(hasBlockAbove(b))
+            toReturn.add(getBlockAt(b.getMapX(),b.getMapY()-1));
+        return toReturn;
+    }
+
 
     public boolean hasAnyAbove(int x, int y)
     {
@@ -70,6 +136,26 @@ public class Map
             }
             else
                 return hasAnyAbove(x, y-1);
+        }
+    }
+
+    public Block getFirstLeft(int x, int y)
+    {
+        if(blocks[x-1][y].isEmpty())
+            return blocks[x-1][y];
+        else
+        {
+            return getFirstLeft(x - 1, y);
+        }
+    }
+
+    public Block getFirstRight(int x, int y)
+    {
+        if(blocks[x+1][y].isEmpty())
+            return blocks[x+1][y];
+        else
+        {
+            return getFirstLeft(x+1, y);
         }
     }
 
