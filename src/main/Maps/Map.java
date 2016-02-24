@@ -2,9 +2,11 @@ package main.Maps;
 
 import main.Blocks.Block;
 import main.Blocks.Dirt;
+import main.Blocks.Stone;
 import main.Camera;
 import main.Entities.Player;
 
+import java.awt.*;
 import java.util.ArrayList;
 
 /**
@@ -15,7 +17,7 @@ public class Map
 {
     public Block[][] blocks;
     public int width, height;
-    private int gravity = 15;
+    private int gravity = 10;
     public int scale = 16;
     int groundLevel = 200;
 
@@ -29,21 +31,66 @@ public class Map
 
     public Map()
     {
-        width = 512;
-        height = 512;
-
+        width = 4096;
+        height = 1024;
 
         blocks = new Block[width][height];
-        for(int i = 0 ; i < width; i++)
+
+        fillWithDirt();
+        createStones();
+        createOverWorld();
+        generateMountains();
+        generateRavines();
+    }
+
+    public void createStones()
+    {
+        for(int j = 0; j < width; j++)
         {
-            for(int j = 0; j < height; j++)
+            for (int i = height / 2; i < height; i++)
             {
-                blocks[i][j] = new Dirt(i*(scale),j*(scale));
-                blocks[i][j].setMapCoords(i,j);
+                blocks[j][i] = new Stone(j*scale,i*scale);
+                blocks[j][i].setMapCoords(j,i);
             }
         }
+        int numStone = (height*width/(scale*8));
+        int randx, randy;
+        Block parent;
+        for(int i = 0; i < numStone; i++)
+        {
+            randx = (int)(Math.random()*width);
+            randy = (int)(Math.random()*height);
+            if(blocks[randx][randy] instanceof Dirt)
+            {
+                blocks[randx][randy] = new Stone(randx*scale,randy*scale);
+                blocks[randx][randy].setMapCoords(randx,randy);
+                parent = blocks[randx][randy];
+                ArrayList<Block> stones = new ArrayList<Block>();
+                stones.add(parent);
+                ArrayList<Block> surrounding;
+                int size = (int)(Math.random()*16);
+                for(int j = 0; j < size; j++)
+                {
+                    surrounding = getSurrounding(stones);
+                    if(surrounding.size()==0)
+                        break;
+                    int rand =(int) (Math.random()*surrounding.size());
+                    blocks[surrounding.get(rand).getMapX()][surrounding.get(rand).getMapY()] = new Stone(surrounding.get(rand).getX(),surrounding.get(rand).getY());
+                    blocks[surrounding.get(rand).getMapX()][surrounding.get(rand).getMapY()].setMapCoords(surrounding.get(rand).getMapX(),surrounding.get(rand).getMapY());
+                    stones.add(blocks[surrounding.get(rand).getMapX()][surrounding.get(rand).getMapY()]);
+                }
 
+            }
+            else
+            {
+                i--;
+                continue;
+            }
+        }
+    }
 
+    public void createOverWorld()
+    {
         for(int i = 0; i < width; i++)
         {
             for(int j = 0; j < height; j++)
@@ -52,14 +99,28 @@ public class Map
                     blocks[i][j].empty = true;
             }
         }
+    }
 
-        generateMountains();
+
+    public void fillWithDirt()
+    {
+        for(int i = 0 ; i < width; i++)
+        {
+            for(int j = 0; j < height; j++)
+            {
+                blocks[i][j] = new Dirt(i*(scale),j*(scale));
+                blocks[i][j].setMapCoords(i,j);
+            }
+        }
     }
 
     public void generateMountains()
     {
-        System.out.println("Starting");
-        int numMountains = (int)(3 + Math.random()*(width/64));
+        long start, end;
+        start = System.currentTimeMillis();
+        System.out.println("Starting Mountains");
+        int numMountains = (int)(1 + Math.random()*(width/(scale*2)));
+        System.out.println(numMountains);
         for(int j = 0; j < numMountains; j++)
         {
             int randomX = (int) (Math.random() * width);
@@ -68,15 +129,15 @@ public class Map
             parent.setMapCoords(randomX,groundLevel);
            // System.out.println(parent.getMapY()+parent.getMapX());
             blocks[randomX][groundLevel] = parent;
-            int maxHeight = 3 * groundLevel / 4;
+            int maxHeight = groundLevel / 2;
             ArrayList<Block> mountain = new ArrayList<Block>();
             mountain.add(parent);
           //  System.out.println("Mountain size : "+mountain.size());
-            int randomSize = (int) (Math.random() * (maxHeight * scale * 4));
+            int randomSize = (int) (Math.random() * (maxHeight * scale * 2));
             //System.out.println("parent mapy : "+currentRow);
             for (int i = 0; i < randomSize; i++)
             {
-                ArrayList<Block> surrounding = getSurrounding(mountain);
+                ArrayList<Block> surrounding = getSurroundingAbove(mountain);
                 if(surrounding.size() == 0)
                     break;
              //   System.out.println("surrounding :"+surrounding.size());
@@ -86,7 +147,60 @@ public class Map
 
             }
         }
-        System.out.println("Ending");
+
+
+
+            end = System.currentTimeMillis();
+        System.out.println("Ending after "+(end-start)+" miliseconds");
+    }
+
+    public void generateRavines()
+    {
+        long start, end;
+        start = System.currentTimeMillis();
+        System.out.println("Starting Ravines");
+        int numRavines = (int)(1 + Math.random()*(width/(scale*2)));
+        System.out.println(numRavines);
+        for(int j = 0; j < numRavines; j++)
+        {
+            int randomX = (int) (Math.random() * width);
+            // System.out.println("random x :"+randomX);
+            Block parent = getHighestY(randomX);
+            parent.setMapCoords(randomX,parent.getY()/scale);
+            // System.out.println(parent.getMapY()+parent.getMapX());
+            blocks[randomX][parent.getMapY()] = parent;
+            int maxHeight = groundLevel / 2;
+            ArrayList<Block> ravines = new ArrayList<Block>();
+            ravines.add(parent);
+            parent.setEmpty(true);
+            //  System.out.println("Mountain size : "+mountain.size());
+            int randomSize = (int) (Math.random() * (maxHeight * scale) / 2);
+            //System.out.println("parent mapy : "+currentRow);
+            for (int i = 0; i < randomSize; i++)
+            {
+                ArrayList<Block> surrounding = getSurroundingBelow(ravines);
+                if(surrounding.size() == 0)
+                    break;
+                //System.out.println("surrounding :"+surrounding.size());
+                int temp = (int) (Math.random()*surrounding.size());
+                surrounding.get(temp).setEmpty(true);
+                ravines.add(surrounding.get(temp));
+
+            }
+        }
+
+        for(int i = 0; i < width; i++)
+        {
+            for(int j = 0; j < height; j++)
+            {
+                blocks[i][j].tick();
+                if(blocks[i][j] instanceof Dirt && !hasAnyAbove(i,j))
+                    blocks[i][j].setC(Color.GREEN);
+            }
+        }
+
+        end = System.currentTimeMillis();
+        System.out.println("Ending after "+(end-start)+" miliseconds");
     }
 
     public ArrayList<Block> getSurrounding(ArrayList<Block> A)
@@ -94,20 +208,73 @@ public class Map
         ArrayList<Block> toReturn = new ArrayList<Block>();
         for(Block b : A)
         {
-            if(!hasBlockLeft(b)&&!toReturn.contains(blocks[b.mapX-1][b.mapY]))
+            if(hasBlockLeft(b)&&!toReturn.contains(getBlockAt(b.x-scale,b.y)))
             {
                 //System.out.println("1");
-                toReturn.add(blocks[b.mapX-1][b.mapY]);
+                toReturn.add(getBlockAt(b.x-scale,b.y));
             }
-            if(!hasBlockAbove(b)&&!toReturn.contains(blocks[b.mapX][b.mapY-1]))
+            if(hasBlockAbove(b)&&!toReturn.contains(getBlockAt(b.x,b.y-scale)))
             {
                 //System.out.println("2");
-                toReturn.add(blocks[b.mapX][b.mapY-1]);
+                toReturn.add(getBlockAt(b.x,b.y-scale));
             }
-            if (!hasBlockRight(b)&&!toReturn.contains(blocks[b.mapX+1][b.mapY]))
+            if(hasBlockRight(b)&&!toReturn.contains(getBlockAt(b.x+scale,b.y)))
             {
                 //System.out.println("3");
-                toReturn.add(blocks[b.mapX+1][b.mapY]);
+                toReturn.add(getBlockAt(b.x+scale,b.y));
+            }
+            if(hasBlockBelow(b)&&!toReturn.contains(getBlockAt(b.x,b.y+scale)))
+            {
+                //System.out.println("2");
+                toReturn.add(getBlockAt(b.x,b.y+scale));
+            }
+        }
+        return toReturn;
+    }
+
+    public ArrayList<Block> getSurroundingAbove(ArrayList<Block> A)
+    {
+        ArrayList<Block> toReturn = new ArrayList<Block>();
+        for(Block b : A)
+        {
+            if(!hasBlockLeft(b)&&!toReturn.contains(getBlockAt(b.x-scale,b.y)))
+            {
+                //System.out.println("1");
+                toReturn.add(getBlockAt(b.x-scale,b.y));
+            }
+            if(!hasBlockAbove(b)&&!toReturn.contains(getBlockAt(b.x,b.y-scale)))
+            {
+                //System.out.println("2");
+                toReturn.add(getBlockAt(b.x,b.y-scale));
+            }
+            if (!hasBlockRight(b)&&!toReturn.contains(getBlockAt(b.x+scale,b.y)))
+            {
+                //System.out.println("3");
+                toReturn.add(getBlockAt(b.x+scale,b.y));
+            }
+        }
+        return toReturn;
+    }
+
+    public ArrayList<Block> getSurroundingBelow(ArrayList<Block> A)
+    {
+        ArrayList<Block> toReturn = new ArrayList<Block>();
+        for(Block b : A)
+        {
+            if(hasBlockLeft(b)&&!toReturn.contains(getBlockAt(b.x-scale,b.y)))
+            {
+                //System.out.println("1");
+                toReturn.add(getBlockAt(b.x-scale,b.y));
+            }
+            if(hasBlockBelow(b)&&!toReturn.contains(getBlockAt(b.x,b.y+scale)))
+            {
+                //System.out.println("2");
+                toReturn.add(getBlockAt(b.x,b.y+scale));
+            }
+            if (hasBlockRight(b)&&!toReturn.contains(getBlockAt(b.x+scale,b.y)))
+            {
+                //System.out.println("3");
+                toReturn.add(getBlockAt(b.x+scale,b.y));
             }
         }
         return toReturn;
@@ -139,6 +306,16 @@ public class Map
             }
             else
                 return hasAnyAbove(x, y-1);
+        }
+    }
+
+    public Block getFirstBelow(int x, int y)
+    {
+        if(!blocks[x][y+1].isEmpty())
+            return blocks[x][y+1];
+        else
+        {
+            return getFirstBelow(x, y + 1);
         }
     }
 
@@ -180,6 +357,8 @@ public class Map
 
     public ArrayList<Block> getContainingBlocks(Camera c)
     {
+        long start, end;
+        start = System.currentTimeMillis();
         ArrayList<Block> temp = new ArrayList<Block>();
         Block topLeft = getBlockAt(c.getX(),c.getY());
         int topLeftX = topLeft.getMapX();
@@ -220,11 +399,24 @@ public class Map
                 }
             }
         }
-
-
-
-
+        end = System.currentTimeMillis();
+        //System.out.println("Ending getContaining Blocks after "+(end-start)+" miliseconds");
         return temp;
+    }
+
+
+    public Block getHighestY(int x)
+    {
+        for(int i = 0; i < height; i++)
+        {
+            if(!blocks[x][i].isEmpty())
+            {
+               // System.out.println("Found highest at y = "+i);
+                return blocks[x][i];
+            }
+
+        }
+        return null;
     }
 
     public Block getBlockAt(int x, int y)

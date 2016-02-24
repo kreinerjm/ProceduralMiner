@@ -222,11 +222,13 @@ public class MinerPanel extends JPanel implements MouseListener, KeyListener
         b2d.fillOval(player.getX() - camera.getX(), player.getY() - camera.getY(), 20, 20);
         b2d.setColor(Color.BLACK);
         b2d.drawOval(player.getX()- camera.getX(),player.getY()-camera.getY(),20,20);
-        Block temp = map.getBlockAt(player.getX(),player.getY());
-        b2d.drawString("Player current square = "+temp.getMapX()+","+temp.getMapY(),500,20);
-        b2d.drawString("Player current x,y = "+player.getX()+","+player.getY(),500,40);
-        b2d.drawString("Camera current x,y = "+camera.getX()+","+camera.getY(),500,60);
+        //Block temp = map.getBlockAt(player.getX(),player.getY());
+        //b2d.drawString("Player current square = "+temp.getMapX()+","+temp.getMapY(),500,20);
+        //b2d.drawString("Player current x,y = "+player.getX()+","+player.getY(),500,40);
+        //b2d.drawString("Camera current x,y = "+camera.getX()+","+camera.getY(),500,60);
         g2d.drawImage(buffer,0,0,buffer.getWidth(),buffer.getHeight(), null);
+
+
 
     }
 
@@ -234,29 +236,33 @@ public class MinerPanel extends JPanel implements MouseListener, KeyListener
 
     public void tick()
     {
+
        // System.out.println(left);
         if(player.getX() > (map.width*map.scale)/2 && player.getX() < (map.width*map.scale))
             left = true;
         else if(player.getX() > 0 && player.getX() < (map.width*map.scale)/2)
             left = false;
 
-        for(int i = 0; i < map.width; i++)
-        {
-            for(int j = 0; j < map.height; j++)
-            {
-                map.blocks[i][j].tick();
-                if(map.blocks[i][j] instanceof Dirt && !map.hasAnyAbove(i,j))
-                    map.blocks[i][j].setC(Color.GREEN);
-            }
-        }
+//        for(int i = 0; i < map.width; i++)
+//        {
+//            for(int j = 0; j < map.height; j++)
+//            {
+//                map.blocks[i][j].tick();
+//                if(map.blocks[i][j] instanceof Dirt && !map.hasAnyAbove(i,j))
+//                    map.blocks[i][j].setC(Color.GREEN);
+//            }
+//        }
 
 
         player.tick();
         camera.setX(player.getX()-512);
         camera.setY(player.getY()-256);
+
+
         playerCollisionDetection();
 
         repaint();
+
     }
 
     public void playerCollisionDetection()
@@ -463,7 +469,12 @@ public class MinerPanel extends JPanel implements MouseListener, KeyListener
         int distance2 = Math.abs(selected.getY()+(map.scale/2)-player.getY()+10);
         int distance = (int)(Math.sqrt(distance1*distance1 + distance2*distance2)+.5);
         if(distance<=player.getMineDistance())
+        {
             selected.empty = true;
+            if(selected.getC().equals(Color.GREEN))
+                map.getFirstBelow(selected.getMapX(),selected.getMapY()).setC(Color.GREEN);
+        }
+
         System.out.println(distance);
         System.out.println(selected.getMapX()+","+selected.getMapY());
 
