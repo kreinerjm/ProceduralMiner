@@ -1,6 +1,7 @@
 package main.Maps;
 
 import main.Blocks.Block;
+import main.Blocks.Dirt;
 import main.Camera;
 import main.Entities.Player;
 
@@ -37,7 +38,7 @@ public class Map
         {
             for(int j = 0; j < height; j++)
             {
-                blocks[i][j] = new Block(i*(scale),j*(scale));
+                blocks[i][j] = new Dirt(i*(scale),j*(scale));
                 blocks[i][j].setMapCoords(i,j);
             }
         }

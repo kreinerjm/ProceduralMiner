@@ -1,5 +1,7 @@
 package main.Blocks;
 
+import java.awt.*;
+
 /**
  * Created by jacob on 2/19/16.
  */
@@ -10,6 +12,16 @@ public class Block
     public int getX() {
         return x;
     }
+
+    public Color getC() {
+        return c;
+    }
+
+    public void setC(Color c) {
+        this.c = c;
+    }
+
+    Color c;
 
     public void setX(int x) {
         this.x = x;
@@ -50,6 +62,11 @@ public class Block
     public int mapX, mapY;
     public boolean empty = false;
 
+    public Block()
+    {
+
+    }
+
     public Block(int x, int y)
     {
         this.x = x;
@@ -67,6 +84,11 @@ public class Block
         if(xx >= x && xx <= x+16 && yy >= y && yy <= y+16)
             return true;
         return false;
+    }
+
+    public void tick()
+    {
+
     }
 
 }

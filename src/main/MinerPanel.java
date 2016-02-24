@@ -1,5 +1,6 @@
 package main;
 
+import main.Blocks.Dirt;
 import main.Entities.Player;
 import main.Maps.Map;
 import main.Blocks.Block;
@@ -40,7 +41,7 @@ public class MinerPanel extends JPanel implements MouseListener, KeyListener
     {
         Graphics2D g2d = (Graphics2D) g;
         Graphics b2d = buffer.createGraphics();
-        b2d.setColor(Color.WHITE);
+        b2d.setColor(new Color(0x2D287B));
         b2d.fillRect(0, 0, buffer.getWidth(), buffer.getHeight());
 
         ArrayList<Block> cameraContains = map.getContainingBlocks(camera);
@@ -48,11 +49,13 @@ public class MinerPanel extends JPanel implements MouseListener, KeyListener
         {
             //System.out.println("left of seam");
             for(Block b : cameraContains) {
-                b2d.setColor(Color.CYAN);
+
                 if (b.getMapX() < map.width / 2) { // on right side of seam
-                    //b2d.fillRect(-camera.getX() + (b.getX() + map.width * map.scale), -camera.getY() + b.getY(), map.scale, map.scale);
+                    //
 
                     if (!b.empty) {
+                        b2d.setColor(b.getC());
+                        b2d.fillRect(-camera.getX() + (b.getX() + map.width * map.scale) , -camera.getY() + b.getY() , map.scale, map.scale);
                         b2d.setColor(Color.BLACK);
                         // System.out.println("Not empty : "+i+","+j);
                         if (!map.hasBlockAbove(b)) {
@@ -76,9 +79,11 @@ public class MinerPanel extends JPanel implements MouseListener, KeyListener
 
                 } //working
                 else {
-                    //b2d.fillRect(-camera.getX() + b.getX(), -camera.getY() + b.getY(), map.scale, map.scale);
+                    //
 
                     if (!b.empty) {
+                        b2d.setColor(b.getC());
+                        b2d.fillRect(-camera.getX() + b.getX(), -camera.getY() + b.getY(), map.scale, map.scale);
                         b2d.setColor(Color.BLACK);
                         // System.out.println("Not empty : "+i+","+j);
                         if (!map.hasBlockAbove(b)) {
@@ -108,9 +113,11 @@ public class MinerPanel extends JPanel implements MouseListener, KeyListener
             for(Block b : cameraContains) {
                 b2d.setColor(Color.CYAN);
                 if (b.getMapX() > map.width / 2) {
-                    //b2d.fillRect(-camera.getX() + (b.getX() - map.width * map.scale), -camera.getY() + b.getY(), map.scale, map.scale);
+                    //
 
                     if (!b.empty) {
+                        b2d.setColor(b.getC());
+                        b2d.fillRect(-camera.getX() + (b.getX() - map.width * map.scale), -camera.getY() + b.getY(), map.scale, map.scale);
                         b2d.setColor(Color.BLACK);
                         // System.out.println("Not empty : "+i+","+j);
                         if (!map.hasBlockAbove(b)) {
@@ -133,9 +140,11 @@ public class MinerPanel extends JPanel implements MouseListener, KeyListener
                     }
 
                 } else {
-                   // b2d.fillRect(-camera.getX() + b.getX(), -camera.getY() + b.getY(), map.scale, map.scale);
+                   //
 
                     if (!b.empty) {
+                        b2d.setColor(b.getC());
+                        b2d.fillRect(-camera.getX() + b.getX(), -camera.getY() + b.getY(), map.scale, map.scale);
                         b2d.setColor(Color.BLACK);
                         // System.out.println("Not empty : "+i+","+j);
                         if (!map.hasBlockAbove(b)) {
@@ -167,11 +176,13 @@ public class MinerPanel extends JPanel implements MouseListener, KeyListener
                 b2d.setColor(Color.CYAN);
                // System.out.println("seam not in view");
                 //b2d.fillOval(-camera.getX() + b.getX(),-camera.getY() + b.getY(),10,10);
-               // b2d.fillRect(-camera.getX() + b.getX(), -camera.getY() + b.getY(), map.scale, map.scale);
+               //
                 //System.out.println(cameraContains.size());
                 //b2d.fillRect(-camera.getX() + b.getX(), -camera.getY() + b.getY(), map.scale, map.scale);
 
                 if (!b.empty) {
+                    b2d.setColor(b.getC());
+                    b2d.fillRect(-camera.getX() + b.getX(), -camera.getY() + b.getY(), map.scale, map.scale);
                     b2d.setColor(Color.BLACK);
                     // System.out.println("Not empty : "+i+","+j);
                     if (!map.hasBlockAbove(b)) {
@@ -198,7 +209,9 @@ public class MinerPanel extends JPanel implements MouseListener, KeyListener
 
 
 
-        b2d.setColor(Color.blue);
+        b2d.setColor(Color.RED);
+        b2d.fillOval(player.getX() - camera.getX(), player.getY() - camera.getY(), 20, 20);
+        b2d.setColor(Color.BLACK);
         b2d.drawOval(player.getX()- camera.getX(),player.getY()-camera.getY(),20,20);
         Block temp = map.getBlockAt(player.getX(),player.getY());
         b2d.drawString("Player current square = "+temp.getMapX()+","+temp.getMapY(),500,20);
@@ -217,6 +230,17 @@ public class MinerPanel extends JPanel implements MouseListener, KeyListener
             left = true;
         else if(player.getX() > 0 && player.getX() < (map.width*map.scale)/2)
             left = false;
+
+        for(int i = 0; i < map.width; i++)
+        {
+            for(int j = 0; j < map.height; j++)
+            {
+                map.blocks[i][j].tick();
+                if(map.blocks[i][j] instanceof Dirt && !map.hasBlockAbove(map.blocks[i][j]))
+                    map.blocks[i][j].setC(Color.GREEN);
+            }
+        }
+
 
         player.tick();
         camera.setX(player.getX()-512);
