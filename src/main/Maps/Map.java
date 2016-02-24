@@ -10,6 +10,7 @@ import java.util.ArrayList;
 /**
  * Created by jacob on 2/19/16.
  */
+
 public class Map
 {
     public Block[][] blocks;
@@ -24,8 +25,6 @@ public class Map
     public void setGravity(int gravity) {
         this.gravity = gravity;
     }
-
-
 
     public Map()
     {
@@ -51,6 +50,26 @@ public class Map
                 if(j <= 20)
                     blocks[i][j].empty = true;
             }
+        }
+    }
+
+    public void generateMountains()
+    {
+
+    }
+
+    public boolean hasAnyAbove(int x, int y)
+    {
+        if(y==0)
+            return false;
+        else
+        {
+            if(hasBlockAbove(getBlockAt(x*scale,y*scale)))
+            {
+                return true;
+            }
+            else
+                return hasAnyAbove(x, y-1);
         }
     }
 

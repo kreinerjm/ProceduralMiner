@@ -244,7 +244,7 @@ public class MinerPanel extends JPanel implements MouseListener, KeyListener
             for(int j = 0; j < map.height; j++)
             {
                 map.blocks[i][j].tick();
-                if(map.blocks[i][j] instanceof Dirt && !map.hasBlockAbove(map.blocks[i][j]))
+                if(map.blocks[i][j] instanceof Dirt && !map.hasAnyAbove(i,j))
                     map.blocks[i][j].setC(Color.GREEN);
             }
         }
