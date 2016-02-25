@@ -43,6 +43,7 @@ public class Map
         generateMountains();
         generateRavines();
         generateCaves();
+        generateTrees();
     }
 
     public void createStones()
@@ -87,6 +88,26 @@ public class Map
             {
                 i--;
                 continue;
+            }
+        }
+    }
+
+    public void generateTrees()
+    {
+        int numTrees = 100;
+        for(int i = 0; i < numTrees; i++)
+        {
+            int randX = (int)(Math.random()*width);
+            int yy = getHighestY(randX).getMapY();
+
+            Block parent = getBlockAt(randX*scale,yy*scale);
+            int current = yy;
+            while(current > parent.getMapY()-20)
+            {
+                blocks[randX][current] = new Dirt(randX*scale,current*scale);
+                blocks[randX][current].setMapCoords(randX,current);
+                blocks[randX][current].setC(new Color(139,69,19));
+                current--;
             }
         }
     }
