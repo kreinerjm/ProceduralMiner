@@ -38,9 +38,11 @@ public class Map
 
         fillWithDirt();
         createStones();
+        createDirtInStone();
         createOverWorld();
         generateMountains();
         generateRavines();
+        generateCaves();
     }
 
     public void createStones()
@@ -68,7 +70,7 @@ public class Map
                 ArrayList<Block> stones = new ArrayList<Block>();
                 stones.add(parent);
                 ArrayList<Block> surrounding;
-                int size = (int)(Math.random()*16);
+                int size = (int)(Math.random()*32);
                 for(int j = 0; j < size; j++)
                 {
                     surrounding = getSurrounding(stones);
@@ -88,6 +90,47 @@ public class Map
             }
         }
     }
+
+    public void createDirtInStone()
+    {
+        int numDirt = (height*width/(scale*8));
+        int randx, randy;
+        Block parent;
+        for(int i = 0; i < numDirt; i++)
+        {
+            randx = (int)(Math.random()*width);
+            randy = (int)(height/2+Math.random()*(height/2));
+            if(blocks[randx][randy] instanceof Stone)
+            {
+                blocks[randx][randy] = new Dirt(randx*scale,randy*scale);
+                blocks[randx][randy].setMapCoords(randx,randy);
+                parent = blocks[randx][randy];
+                ArrayList<Block> dirts = new ArrayList<Block>();
+                dirts.add(parent);
+                ArrayList<Block> surrounding;
+                int size = (int)(Math.random()*32);
+                //System.out.println(size);
+                for(int j = 0; j < size; j++)
+                {
+                    surrounding = getSurrounding(dirts);
+                    if(surrounding.size()==0)
+                        break;
+                    //System.out.println(surrounding.size());
+                    int rand =(int) (Math.random()*surrounding.size());
+                    blocks[surrounding.get(rand).getMapX()][surrounding.get(rand).getMapY()] = new Dirt(surrounding.get(rand).getX(),surrounding.get(rand).getY());
+                    blocks[surrounding.get(rand).getMapX()][surrounding.get(rand).getMapY()].setMapCoords(surrounding.get(rand).getMapX(),surrounding.get(rand).getMapY());
+                    dirts.add(blocks[surrounding.get(rand).getMapX()][surrounding.get(rand).getMapY()]);
+                }
+
+            }
+            else
+            {
+                i--;
+                continue;
+            }
+        }
+    }
+
 
     public void createOverWorld()
     {
@@ -154,11 +197,48 @@ public class Map
         System.out.println("Ending after "+(end-start)+" miliseconds");
     }
 
+    public void generateCaves()
+    {
+        int numCaves = (int)(500 + (Math.random()*(((height-groundLevel)*width)/(scale*scale*scale))));
+        System.out.println("Starting caves");
+        System.out.println(numCaves);
+        for(int j = 0; j < numCaves; j++)
+        {
+            int randomX = (int) (Math.random() * width);
+            int randomY = (int) (groundLevel + (Math.random() * height - groundLevel));
+            // System.out.println("random x :"+randomX);
+            Block parent = getBlockAt(randomX * scale, randomY * scale);
+            parent.setMapCoords(randomX,randomY);
+            // System.out.println(parent.getMapY()+parent.getMapX());
+            if(!blocks[randomX][randomY].isEmpty()) {
+                blocks[randomX][randomY] = parent;
+                int maxHeight = (height - groundLevel);
+                ArrayList<Block> caves = new ArrayList<Block>();
+                caves.add(parent);
+                parent.setEmpty(true);
+                //  System.out.println("Mountain size : "+mountain.size());
+                int randomSize = (int) (Math.random() * (maxHeight));
+                //System.out.println("parent mapy : "+currentRow);
+                for (int i = 0; i < randomSize; i++) {
+                    ArrayList<Block> surrounding = getSurrounding(caves);
+                    if (surrounding.size() == 0)
+                        break;
+                    //System.out.println("surrounding :"+surrounding.size());
+                    int temp = (int) (Math.random() * surrounding.size());
+                    surrounding.get(temp).setEmpty(true);
+                    caves.add(surrounding.get(temp));
+
+                }
+            }
+        }
+    }
+
+
     public void generateRavines()
     {
         long start, end;
         start = System.currentTimeMillis();
-        System.out.println("Starting Ravines");
+        //System.out.println("Starting Ravines");
         int numRavines = (int)(1 + Math.random()*(width/(scale*2)));
         System.out.println(numRavines);
         for(int j = 0; j < numRavines; j++)

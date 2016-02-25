@@ -19,7 +19,8 @@ import java.util.ArrayList;
  */
 public class MinerPanel extends JPanel implements MouseListener, KeyListener
 {
-
+    MouseEvent me;
+    boolean mouse = false;
     Player player;
     BufferedImage buffer;
     Map map;
@@ -260,6 +261,8 @@ public class MinerPanel extends JPanel implements MouseListener, KeyListener
 
 
         playerCollisionDetection();
+        handleMouse(me);
+
 
         repaint();
 
@@ -450,34 +453,40 @@ public class MinerPanel extends JPanel implements MouseListener, KeyListener
         return toReturn;
     }
 
+    public void handleMouse(MouseEvent e)
+    {
+        if(mouse) {
+            int xx = (int)getMousePosition().getX();
+            int yy = (int)getMousePosition().getY();
+            Block selected = map.getBlockAt((xx + camera.getX()),(yy + camera.getY()));
+            int distance1 = Math.abs(selected.getX() + (map.scale / 2) - player.getX() + 10);
+            int distance2 = Math.abs(selected.getY() + (map.scale / 2) - player.getY() + 10);
+            int distance = (int) (Math.sqrt(distance1 * distance1 + distance2 * distance2) + .5);
+            if (distance <= player.getMineDistance()) {
+                selected.empty = true;
+                if (selected.getC().equals(Color.GREEN))
+                    map.getFirstBelow(selected.getMapX(), selected.getMapY()).setC(Color.GREEN);
+            }
+
+            //System.out.println(distance);
+            //System.out.println(selected.getMapX() + "," + selected.getMapY());
+        }
+    }
+
     @Override
     public void mouseClicked(MouseEvent e) {
-
     }
 
     @Override
     public void mousePressed(MouseEvent e)
     {
-
+       mouse=true;
     }
 
     @Override
     public void mouseReleased(MouseEvent e)
     {
-        Block selected = map.blocks[(e.getX() + camera.getX())/(map.scale)][(e.getY() + camera.getY())/(map.scale)];
-        int distance1 = Math.abs(selected.getX()+(map.scale/2)-player.getX()+10);
-        int distance2 = Math.abs(selected.getY()+(map.scale/2)-player.getY()+10);
-        int distance = (int)(Math.sqrt(distance1*distance1 + distance2*distance2)+.5);
-        if(distance<=player.getMineDistance())
-        {
-            selected.empty = true;
-            if(selected.getC().equals(Color.GREEN))
-                map.getFirstBelow(selected.getMapX(),selected.getMapY()).setC(Color.GREEN);
-        }
-
-        System.out.println(distance);
-        System.out.println(selected.getMapX()+","+selected.getMapY());
-
+        mouse=false;
     }
 
     @Override
